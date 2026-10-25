@@ -98,5 +98,6 @@ visible app or convert background time directly into mAh.
 - [Public Android APIs and history collection limits](android-public-apis.md)
 - [ADB, Shizuku, root, and system attribution options](android-privileged-options.md)
 - [BatStats source-level follow-up and recent candidates](batstats-source-check.md)
+- [Wattdog license, source reuse, and correctness evaluation](wattdog-evaluation.md)
 
 This repository currently contains research and project setup, not a runnable Android app.

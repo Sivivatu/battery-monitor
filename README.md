@@ -23,7 +23,7 @@ measurements and must be presented accordingly.
 
 Start with the [research findings and recommendation](docs/research/README.md).
 The reports cover existing applications, public Android APIs, privileged attribution,
-and a source-level check of BatStats, tailored to a Pixel 9 Pro on Android 17.
+and source evaluations of BatStats and Wattdog, tailored to a Pixel 9 Pro on Android 17.
 
 The key feasibility question is access: device-wide drain and app activity history
 are available through public APIs, but those observations alone cannot measure
