@@ -1,0 +1,19 @@
+# Machine-local Android and IDE configuration
+local.properties
+.gradle/
+.idea/
+*.iml
+**/build/
+.cxx/
+.externalNativeBuild/
+
+# Credentials and local environment
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+
+# OS files
+.DS_Store
+Thumbs.db
