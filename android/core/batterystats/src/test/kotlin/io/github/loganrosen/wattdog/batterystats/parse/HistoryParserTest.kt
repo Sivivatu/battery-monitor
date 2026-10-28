@@ -1,6 +1,7 @@
 package io.github.loganrosen.wattdog.batterystats.parse
 
 import io.github.loganrosen.wattdog.batterystats.Fixtures
+import io.github.loganrosen.wattdog.batterystats.analysis.HistorySummary
 import io.github.loganrosen.wattdog.batterystats.model.AppUid
 import io.github.loganrosen.wattdog.batterystats.model.BatteryHistory
 import io.github.loganrosen.wattdog.batterystats.model.HistoryMarker
@@ -63,6 +64,61 @@ class HistoryParserTest {
         assertTrue(top.all { it.endMillis >= it.startMillis })
         assertTrue(h.tagged(BatteryHistory.WAKE_LOCK).isNotEmpty())
         assertTrue(h.flag(BatteryHistory.CELL_HIGH_TX).size > 100)
+    }
+
+    @Test
+    fun `absolute clock anchors resolve the year before recording timestamps`() {
+        for (anchor in listOf("TIME:", "RESET:TIME:")) {
+            val h = HistoryParser.parse(
+                """
+                  12-31 23:00:00.125 $anchor 2026-12-31-23-00-00
+                  12-31 23:00:00.125 090 +screen +running
+                  01-01 01:00:00.125 080 -screen -running
+                """.trimIndent().prependIndent("  ").lineSequence(),
+                defaultYear = 2027,
+            )
+            val start = clock("2026-12-31T23:00:00.125")
+            val end = clock("2027-01-01T01:00:00.125")
+            assertEquals(start, h.startMillis, anchor)
+            assertEquals(end, h.endMillis, anchor)
+            assertEquals(7_200_000L, h.durationMillis, anchor)
+            assertEquals(listOf(LevelPoint(start, 90), LevelPoint(end, 80)), h.levels, anchor)
+            assertEquals(listOf(HistorySpan(start, end)), h.flag(BatteryHistory.SCREEN), anchor)
+            val expectedMarkers = if (anchor == "RESET:TIME:") listOf(HistoryMarker(start, HistoryMarker.Kind.RESET)) else emptyList()
+            assertEquals(expectedMarkers, h.markers, anchor)
+            val summary = HistorySummary.from(h)
+            assertEquals(7_200_000L, summary.screenOnMillis, anchor)
+            assertEquals(5.0, summary.screenOnDropPerHour, anchor)
+        }
+    }
+
+    @Test
+    fun `absolute leap day uses the anchored year instead of the default year`() {
+        val h = HistoryParser.parse(
+            """
+              02-29 12:00:00.000 RESET:TIME: 2024-02-29-12-00-00
+              02-29 12:00:00.000 090 +screen
+              02-29 12:01:00.000 089 -screen
+            """.trimIndent().prependIndent("  ").lineSequence(),
+            defaultYear = 2027,
+        )
+        assertEquals(clock("2024-02-29T12:00:00"), h.startMillis)
+        assertEquals(clock("2024-02-29T12:01:00"), h.endMillis)
+        assertEquals(60_000L, h.flag(BatteryHistory.SCREEN).single().lengthMillis)
+    }
+
+    @Test
+    fun `absolute history without an anchor retains default year rollover`() {
+        val h = HistoryParser.parse(
+            """
+              12-31 23:00:00.000 090 +screen
+              01-01 01:00:00.000 080 -screen
+            """.trimIndent().prependIndent("  ").lineSequence(),
+            defaultYear = 2026,
+        )
+        assertEquals(clock("2026-12-31T23:00:00"), h.startMillis)
+        assertEquals(clock("2027-01-01T01:00:00"), h.endMillis)
+        assertEquals(7_200_000L, h.flag(BatteryHistory.SCREEN).single().lengthMillis)
     }
 
     @Test

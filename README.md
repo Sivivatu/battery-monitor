@@ -62,15 +62,16 @@ Verified locally on October 28, 2026:
 
 | Check | Result |
 | --- | --- |
-| JVM unit tests | 104 passed |
-| Android 14 / API 34 instrumentation | 30 passed |
-| Android 14 host lifecycle checks | 12 passed |
-| Android 17 / API 37 instrumentation | 29 passed; one UI test blocked by System UI ANR |
+| JVM unit tests | 107 passed |
+| Android 14 / API 34 instrumentation | Earlier preview: 30 passed; latest local rerun blocked before instrumentation by System UI ANR |
+| Android 14 host lifecycle checks | Earlier preview: 12 passed; latest local rerun blocked at setup |
+| Android 17 / API 37 instrumentation | Earlier preview: 29 passed; one UI test blocked by System UI ANR |
 | Formatting, lint and debug APK builds | Passed; lint has 0 errors and 10 warnings |
-| Core coverage | 98.31% lines; 77.52% branches; Android app coverage unmeasured |
+| Core coverage | 98.32% lines; 77.63% branches; Android app coverage unmeasured |
 
 See the [executed review-fix evidence](docs/testing/review-fixes-2026-10-28.md)
-and [initial recovery report](docs/testing/recovery-2026-10-28.md).
+and [history clock-anchor regression evidence](docs/testing/pr-1-history-anchor.md).
+The [initial recovery report](docs/testing/recovery-2026-10-28.md) records earlier checks.
 API 37 host lifecycle validation remains blocked by emulator System UI failures.
 Host restart/reboot smoke checks verify file presence and UI recovery; row-level
 durability, baseline continuation, rollback and migration are covered separately

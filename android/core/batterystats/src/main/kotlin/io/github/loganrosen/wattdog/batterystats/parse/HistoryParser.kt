@@ -75,7 +75,12 @@ object HistoryParser {
         fun accept(line: String) {
             absoluteLine.matchEntire(line)?.let { m ->
                 val month = m.groupValues[1].toInt()
-                if (month < lastMonth) year++
+                val clock = timeLine(m.groupValues[7])
+                if (clock != null) {
+                    syncYear(clock)
+                } else if (month < lastMonth) {
+                    year++
+                }
                 lastMonth = month
                 val ldt = LocalDateTime.of(
                     year,
