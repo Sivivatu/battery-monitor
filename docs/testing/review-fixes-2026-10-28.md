@@ -288,3 +288,17 @@ the same serial/timeout options: **PASS**, 32 seconds, all **104 tests passed**.
 The staged whitespace check and secret/generated-file scan passed. No Android
 production source changed after the executed device validation or final review;
 the APK SHA-256 above is unchanged.
+
+## Hosted CI setup correction
+
+The first hosted push/PR runs failed before compilation in
+`android-actions/setup-android@v3`: `sdkmanager tools` reported
+`Failed to find package 'tools'`. The vendor's
+[v3 action inputs](https://github.com/android-actions/setup-android/blob/v3/action.yml)
+default `packages` to `tools platform-tools`. Both active workflow jobs now
+override that input to `platform-tools`; existing Gradle and emulator setup
+continue to provision their required SDK packages. A separate Sol review approved
+the four-line workflow correction, with no checks or security controls removed.
+This CI-only follow-up does not change the preview APK or its source at the
+release tag. Hosted rerun results must be checked separately; local passes above
+are not evidence of a hosted pass.

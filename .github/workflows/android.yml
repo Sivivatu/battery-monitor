@@ -22,6 +22,8 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
       - uses: gradle/actions/setup-gradle@v6
       - run: ./gradlew spotlessCheck :core:batterystats:test :core:batterystats:jacocoTestReport :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug
       - uses: actions/upload-artifact@v7
@@ -43,6 +45,8 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
       - uses: actions/download-artifact@v8
         with:
           name: android-build-and-reports
