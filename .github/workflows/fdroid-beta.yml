@@ -1,0 +1,182 @@
+name: Publish F-Droid beta
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing beta tag on main, for example v0.1.0-beta.1
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: fdroid-beta-publication
+  cancel-in-progress: false
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    outputs:
+      source-sha: ${{ steps.source.outputs.sha }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify release source
+        id: source
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$ ]]
+          release_sha=$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")
+          git merge-base --is-ancestor "$release_sha" origin/main
+          echo "sha=$release_sha" >> "$GITHUB_OUTPUT"
+          git checkout --detach "$release_sha"
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+        with:
+          packages: platform-tools build-tools;36.1.0
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - name: Check publication guards
+        run: python -m unittest discover -s scripts -p test_fdroid_release.py -v
+      - name: Validate and build unsigned release
+        working-directory: android
+        run: ./gradlew spotlessCheck :core:batterystats:test :app:lintRelease :app:assembleRelease --no-parallel --max-workers=2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: unsigned-beta
+          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          if-no-files-found: error
+          retention-days: 7
+  publish:
+    needs: build
+    environment: fdroid-release
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: write
+      pages: write
+    steps:
+      # Release scripts always come from main, never from the input tag.
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Recheck source and load retained repository
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+          SOURCE_SHA: ${{ needs.build.outputs.source-sha }}
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$ ]]
+          test "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")" = "$SOURCE_SHA"
+          git merge-base --is-ancestor "$SOURCE_SHA" origin/main
+          state="$RUNNER_TEMP/fdroid-state"
+          mkdir -p "$state"
+          git init "$state"
+          git -C "$state" remote add origin "$GITHUB_WORKSPACE"
+          if git show-ref --verify --quiet refs/remotes/origin/fdroid-repo; then
+            git -C "$state" fetch origin refs/remotes/origin/fdroid-repo
+            git -C "$state" checkout -b fdroid-repo FETCH_HEAD
+          else
+            # Refuse network errors masquerading as an empty initial feed.
+            test -z "$(git ls-remote --heads origin fdroid-repo)"
+            git -C "$state" checkout --orphan fdroid-repo
+          fi
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+        with:
+          packages: platform-tools build-tools;36.1.0
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - name: Install F-Droid publisher
+        run: python -m pip install --require-hashes -r fdroid/requirements.txt
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: unsigned-beta
+          path: ${{ runner.temp }}/unsigned
+      - name: Sign and verify the complete public feed
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+          SOURCE_SHA: ${{ needs.build.outputs.source-sha }}
+          APK_KEYSTORE_BASE64: ${{ secrets.APK_KEYSTORE_BASE64 }}
+          APK_KEYSTORE_PASSWORD: ${{ secrets.APK_KEYSTORE_PASSWORD }}
+          APK_KEY_ALIAS: ${{ secrets.APK_KEY_ALIAS }}
+          APK_KEY_PASSWORD: ${{ secrets.APK_KEY_PASSWORD }}
+          FDROID_KEYSTORE_BASE64: ${{ secrets.FDROID_KEYSTORE_BASE64 }}
+          FDROID_KEYSTORE_PASSWORD: ${{ secrets.FDROID_KEYSTORE_PASSWORD }}
+          FDROID_KEY_ALIAS: ${{ secrets.FDROID_KEY_ALIAS }}
+          FDROID_KEY_PASSWORD: ${{ secrets.FDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          python scripts/fdroid-release.py --apk "$RUNNER_TEMP/unsigned/app-release-unsigned.apk" --state "$RUNNER_TEMP/fdroid-state" --output "$RUNNER_TEMP/fdroid-public" --tag "$RELEASE_TAG" --source-sha "$SOURCE_SHA"
+      - name: Enable KVM for signed release smoke test
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Test signed release on Android 14
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
+        with:
+          api-level: 34
+          target: default
+          arch: x86_64
+          profile: pixel_7
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
+          disable-animations: true
+          script: python scripts/validate-release.py --serial emulator-5554 --apk "$RUNNER_TEMP/fdroid-public/fdroid/beta/repo/$(python -c 'import json,os; d=json.load(open(os.environ["RUNNER_TEMP"]+"/fdroid-public/release-manifest.json")); print(max(d,key=lambda r:r["versionCode"])["apkName"])')" --output artifacts/release-smoke
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        if: always()
+        with:
+          name: signed-release-smoke
+          path: artifacts/release-smoke/
+          if-no-files-found: ignore
+      - name: Retain immutable APK history
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          state="$RUNNER_TEMP/fdroid-state"
+          git -C "$state" config user.name 'github-actions[bot]'
+          git -C "$state" config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C "$state" add -- fdroid index.html .nojekyll release-manifest.json
+          if ! git -C "$state" diff --cached --quiet; then
+            git -C "$state" commit -m "chore(fdroid): publish $RELEASE_TAG"
+          fi
+          # Push with the checkout's authenticated remote. Never force-push.
+          git fetch "$state" fdroid-repo
+          git push origin FETCH_HEAD:refs/heads/fdroid-repo
+      - name: Create beta release with corresponding source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          SOURCE_SHA: ${{ needs.build.outputs.source-sha }}
+        run: |
+          set -euo pipefail
+          git archive --format=tar.gz --prefix=battery-monitor/ "$SOURCE_SHA" > "$RUNNER_TEMP/battery-monitor-source.tar.gz"
+          cp docs/releasing/beta-release-notes.md "$RUNNER_TEMP/release-notes.md"
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --verify-tag --prerelease --title "Battery Monitor ${RELEASE_TAG#v}" --notes-file "$RUNNER_TEMP/release-notes.md"
+          fi
+          gh release upload "$RELEASE_TAG" "$RUNNER_TEMP"/fdroid-public/fdroid/beta/repo/*.apk "$RUNNER_TEMP/battery-monitor-source.tar.gz" --clobber
+      - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        with:
+          path: ${{ runner.temp }}/fdroid-public
+      - name: Publish GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+      - name: Verify publicly served signatures and APKs
+        run: python scripts/verify-fdroid-live.py --expected-source '${{ needs.build.outputs.source-sha }}'

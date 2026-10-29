@@ -1,0 +1,24 @@
+Categories:
+  - System
+License: GPL-3.0-or-later
+AuthorName: Sivivatu and Wattdog contributors
+WebSite: https://github.com/Sivivatu/battery-monitor
+SourceCode: https://github.com/Sivivatu/battery-monitor
+IssueTracker: https://github.com/Sivivatu/battery-monitor/issues
+Name: Battery Monitor
+Summary: Local battery estimates and app usage history
+Description: |
+  Battery Monitor shows Android's per-app charge estimates, available
+  foreground/background estimates, wakelocks and the system battery timeline.
+  It keeps validated usage history on your device, without ads, accounts,
+  internet permission or telemetry. Android 14 or later is required.
+
+  Collection requires ADB permission grants or Shizuku. This early public beta
+  is an independent GPLv3-or-later Wattdog fork; estimates and physical-device
+  behavior still need validation. Uninstalling removes saved history.
+
+  Setup and limitations: https://github.com/Sivivatu/battery-monitor#install-and-enable-collection
+RepoType: git
+Repo: https://github.com/Sivivatu/battery-monitor.git
+AutoUpdateMode: None
+UpdateCheckMode: None

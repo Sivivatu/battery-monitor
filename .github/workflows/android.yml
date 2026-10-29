@@ -25,6 +25,9 @@ jobs:
         with:
           packages: platform-tools
       - uses: gradle/actions/setup-gradle@v6
+      - name: Check beta publication guards
+        working-directory: .
+        run: python3 -m unittest discover -s scripts -p test_fdroid_release.py -v
       - run: ./gradlew spotlessCheck :core:batterystats:test :core:batterystats:jacocoTestReport :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug
       - uses: actions/upload-artifact@v7
         if: always()

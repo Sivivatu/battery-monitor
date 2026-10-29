@@ -20,14 +20,19 @@ with durable history and stricter checks on battery-usage comparisons.
 
 ## Install and enable collection
 
-Download a debug preview APK from [Releases](https://github.com/Sivivatu/battery-monitor/releases),
-or build it below. The package is `io.github.sivivatu.batterymonitor`, so it can
-coexist with upstream Wattdog. Previews are development builds, not a stable release.
+Install the signed public beta through our [F-Droid repository](https://sivivatu.github.io/battery-monitor/),
+or download its APK from [Releases](https://github.com/Sivivatu/battery-monitor/releases).
+No tester account is needed. This is our own beta feed, separate from the default
+f-droid.org catalogue. The package is `io.github.sivivatu.batterymonitor`, so it can
+coexist with upstream Wattdog. It is an early beta, not a stable release.
+
+Moving from a debug preview to the signed beta requires uninstalling the preview,
+which deletes its local history. Later beta updates preserve the signing identity.
 
 Collection needs elevated access. The ADB route was exercised on emulators:
 
 ```sh
-adb install -r app-debug.apk
+adb install -r io.github.sivivatu.batterymonitor_2.apk
 adb shell pm grant io.github.sivivatu.batterymonitor android.permission.DUMP
 adb shell pm grant io.github.sivivatu.batterymonitor android.permission.PACKAGE_USAGE_STATS
 adb shell pm grant io.github.sivivatu.batterymonitor android.permission.BATTERY_STATS
@@ -69,6 +74,9 @@ Verified locally on October 28, 2026:
 | Formatting, lint and debug APK builds | Passed; lint has 0 errors and 10 warnings |
 | Core coverage | 98.32% lines; 77.63% branches; Android app coverage unmeasured |
 
+The initial-beta [release evidence](docs/testing/fdroid-beta-2026-10-29.md) records
+the minified release checks and oversized SQLite baseline regression.
+
 See the [executed review-fix evidence](docs/testing/review-fixes-2026-10-28.md)
 and [history clock-anchor regression evidence](docs/testing/pr-1-history-anchor.md).
 The [initial recovery report](docs/testing/recovery-2026-10-28.md) records earlier checks.
@@ -82,6 +90,8 @@ Daily trends assign whole intervals to their UTC capture-end date. Real Pixel
 accuracy, collection overhead, long-term Doze behavior and Shizuku operation still
 need physical-device validation. Unknown installation metadata cannot identify a
 same-package reinstall reliably.
+
+Release operators: see the [publication and recovery runbook](docs/releasing/README.md).
 
 ## Research
 
