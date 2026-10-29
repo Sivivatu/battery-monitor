@@ -1,6 +1,8 @@
-# F-Droid beta preparation — 2026-10-29
+# F-Droid beta publication — 2026-10-29
 
-This records executed evidence separately from pending publication.
+Initial public beta published and verified on 2026-10-29. Earlier preparation
+evidence is retained below; published artifacts and outstanding validation are
+identified separately.
 
 ## Completed
 
@@ -36,13 +38,43 @@ This records executed evidence separately from pending publication.
   Tested APK SHA-256: `a8184b7fd570cbea73a1ceb9ee64530e4a57e8063b85da6423aacde1317f1bed`.
   CI rebuild bytes may differ; the final release records its own hash.
 
-## Pending
+## Published and verified
 
-- Hosted CI run, tagged prerelease, live Pages publication and public signature checks.
-- A real F-Droid client install and a two-version client upgrade. The release smoke
-  script validates signed in-place reinstall, not an incremental client upgrade.
+- [PR1](https://github.com/Sivivatu/battery-monitor/pull/1) merged after all checks
+  passed. Both hosted validation runs passed 31 instrumentation tests and all
+  lifecycle checks. One run needed a single retry for the post-reboot dashboard
+  assertion; no application changes or weakened assertions were used to pass it.
+- Tag `v0.1.0-beta.1` points to merged source
+  `cb487a40d66848a17a354838be59b54b851b9698`.
+- [Publication workflow 40964616497](https://github.com/Sivivatu/battery-monitor/actions/runs/40964616497)
+  passed both build and publish jobs, including all eight signed release smoke
+  checks, retained-state push, prerelease assets, Pages deployment and live verification.
+- [Public landing page](https://sivivatu.github.io/battery-monitor/) and
+  [beta feed](https://sivivatu.github.io/battery-monitor/fdroid/beta/repo) are live.
+  Independent verification passed both signed index formats, APK hash/certificate
+  and the expected source commit. Public state is retained on branch `fdroid-repo`.
+- [GitHub prerelease](https://github.com/Sivivatu/battery-monitor/releases/tag/v0.1.0-beta.1)
+  contains the signed APK and corresponding GPL source archive. The APK matches
+  the locally smoke-tested bytes, SHA-256
+  `a8184b7fd570cbea73a1ceb9ee64530e4a57e8063b85da6423aacde1317f1bed`.
+- Source archive SHA-256
+  `336fe8a90b26212d533ed63d728c2d0fe61b00639ec7d6dbf90a090dbb3986db`
+  matches a fresh `git archive` of the release tag exactly.
+- Official F-Droid client 2.0.2 on a disposable API34 emulator accepted the
+  fingerprinted feed, displayed Battery Monitor, and installed versionCode 2 /
+  `0.1.0-beta.1` through Android's normal installer confirmation. Android reports
+  installer `org.fdroid.fdroid`; pulling the installed APK produced the exact
+  published hash, and it is not debuggable. Local, Git-ignored evidence is under
+  `artifacts/beta-release/fdroid-client/`; downloaded hosted smoke evidence is under
+  `artifacts/beta-release/published/ci-smoke/`.
 
-The first release is `0.1.0-beta.1`, versionCode2. The beta feed is developer-operated,
+## Remaining validation
+
+A real two-version F-Droid-client upgrade has not been exercised: this feed has
+one release. Signed in-place reinstall and repository version/retention guards
+passed, but they do not establish a two-version client upgrade.
+
+The first release is `0.1.0-beta.1`, versionCode 2. The beta feed is developer-operated,
 not an assertion of inclusion in the default f-droid.org catalogue. No telemetry,
 remote crash reporting, app account or internet permission is added.
 
