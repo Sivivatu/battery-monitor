@@ -64,6 +64,7 @@ jobs:
     permissions:
       contents: write
       pages: write
+      id-token: write # Required by deploy-pages to verify deployment provenance.
     steps:
       # Release scripts always come from main, never from the input tag.
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6

@@ -16,8 +16,10 @@ This records executed evidence separately from pending publication.
   signing/index integration also passed with a test-only state directory. Its source
   label is not a published release claim; the eventual release uses the merged tag.
 - Independent Sol code and security reviews approved without remaining HIGH or
-  CRITICAL findings. Review findings led to a full Python dependency hash lock and
-  removal of an unused workflow permission. Both workflow YAML files pass actionlint
+  CRITICAL findings. Review findings led to a full Python dependency hash lock.
+  A subsequent automated review corrected the publication job's OIDC permission:
+  `deploy-pages` requires `id-token: write` independently of Infisical authentication.
+  Both workflow YAML files pass actionlint
   1.7.12, downloaded from its official release and checksum-verified.
 - API34 focused SQLite regression passed: `OK (1 test)`, 25.95 seconds. A >3MiB
   Unicode raw baseline remains readable across reopening/replacement, with three
