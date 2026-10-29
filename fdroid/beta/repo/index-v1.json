@@ -1,0 +1,103 @@
+{
+  "repo": {
+    "timestamp": 1793312485000,
+    "version": 20002,
+    "name": "Battery Monitor Beta",
+    "icon": "icon.png",
+    "address": "https://sivivatu.github.io/battery-monitor/fdroid/beta/repo",
+    "description": "Public early beta builds. Android 14+, ADB grants or Shizuku required. No telemetry."
+  },
+  "requests": {
+    "install": [],
+    "uninstall": []
+  },
+  "apps": [
+    {
+      "authorName": "Sivivatu and Wattdog contributors",
+      "categories": [
+        "System"
+      ],
+      "suggestedVersionCode": "2",
+      "description": "Battery Monitor shows Android's per-app charge estimates, available\nforeground/background estimates, wakelocks and the system battery timeline.\nIt keeps validated usage history on your device, without ads, accounts,\ninternet permission or telemetry. Android 14 or later is required.\n\nCollection requires ADB permission grants or Shizuku. This early public beta\nis an independent GPLv3-or-later Wattdog fork; estimates and physical-device\nbehavior still need validation. Uninstalling removes saved history.\n\nSetup and limitations: https://github.com/Sivivatu/battery-monitor#install-and-enable-collection\n",
+      "issueTracker": "https://github.com/Sivivatu/battery-monitor/issues",
+      "license": "GPL-3.0-or-later",
+      "name": "Battery Monitor",
+      "sourceCode": "https://github.com/Sivivatu/battery-monitor",
+      "summary": "Local battery estimates and app usage history",
+      "webSite": "https://github.com/Sivivatu/battery-monitor",
+      "added": 1793312484000,
+      "packageName": "io.github.sivivatu.batterymonitor",
+      "lastUpdated": 1793312484000
+    }
+  ],
+  "packages": {
+    "io.github.sivivatu.batterymonitor": [
+      {
+        "added": 1793312484000,
+        "apkName": "io.github.sivivatu.batterymonitor_2.apk",
+        "hash": "a8184b7fd570cbea73a1ceb9ee64530e4a57e8063b85da6423aacde1317f1bed",
+        "hashType": "sha256",
+        "minSdkVersion": 34,
+        "nativecode": [
+          "arm64-v8a",
+          "armeabi-v7a",
+          "x86",
+          "x86_64"
+        ],
+        "packageName": "io.github.sivivatu.batterymonitor",
+        "sig": "71664a896365b1eaa0232ff7d439abff",
+        "signer": "d524168decc8c4c1fa779dc1a0ad5dd5a3882ccd4500e8cee0504328d481bc57",
+        "size": 2904879,
+        "targetSdkVersion": 37,
+        "uses-permission": [
+          [
+            "android.permission.DUMP",
+            null
+          ],
+          [
+            "android.permission.BATTERY_STATS",
+            null
+          ],
+          [
+            "android.permission.PACKAGE_USAGE_STATS",
+            null
+          ],
+          [
+            "android.permission.QUERY_ALL_PACKAGES",
+            null
+          ],
+          [
+            "android.permission.POST_NOTIFICATIONS",
+            null
+          ],
+          [
+            "android.permission.WAKE_LOCK",
+            null
+          ],
+          [
+            "android.permission.ACCESS_NETWORK_STATE",
+            null
+          ],
+          [
+            "android.permission.RECEIVE_BOOT_COMPLETED",
+            null
+          ],
+          [
+            "android.permission.FOREGROUND_SERVICE",
+            null
+          ],
+          [
+            "io.github.sivivatu.batterymonitor.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+            null
+          ],
+          [
+            "moe.shizuku.manager.permission.API_V23",
+            null
+          ]
+        ],
+        "versionCode": 2,
+        "versionName": "0.1.0-beta.1"
+      }
+    ]
+  }
+}

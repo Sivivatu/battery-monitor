@@ -1,0 +1,116 @@
+{
+  "repo": {
+    "name": {
+      "en-US": "Battery Monitor Beta"
+    },
+    "description": {
+      "en-US": "Public early beta builds. Android 14+, ADB grants or Shizuku required. No telemetry."
+    },
+    "icon": {
+      "en-US": {
+        "name": "/icons/icon.png",
+        "sha256": "d01cd06c7aede23f7636ce666cda8d0b34a479d8694df38c3d831b92ef7ffc73",
+        "size": 848
+      }
+    },
+    "address": "https://sivivatu.github.io/battery-monitor/fdroid/beta/repo",
+    "timestamp": 1793312485000,
+    "categories": {
+      "System": {
+        "name": {
+          "en-US": "System"
+        }
+      }
+    }
+  },
+  "packages": {
+    "io.github.sivivatu.batterymonitor": {
+      "metadata": {
+        "added": 1793312484000,
+        "categories": [
+          "System"
+        ],
+        "issueTracker": "https://github.com/Sivivatu/battery-monitor/issues",
+        "lastUpdated": 1793312484000,
+        "license": "GPL-3.0-or-later",
+        "sourceCode": "https://github.com/Sivivatu/battery-monitor",
+        "webSite": "https://github.com/Sivivatu/battery-monitor",
+        "authorName": "Sivivatu and Wattdog contributors",
+        "name": {
+          "en-US": "Battery Monitor"
+        },
+        "summary": {
+          "en-US": "Local battery estimates and app usage history"
+        },
+        "description": {
+          "en-US": "Battery Monitor shows Android's per-app charge estimates, available\nforeground/background estimates, wakelocks and the system battery timeline.\nIt keeps validated usage history on your device, without ads, accounts,\ninternet permission or telemetry. Android 14 or later is required.\n\nCollection requires ADB permission grants or Shizuku. This early public beta\nis an independent GPLv3-or-later Wattdog fork; estimates and physical-device\nbehavior still need validation. Uninstalling removes saved history.\n\nSetup and limitations: https://github.com/Sivivatu/battery-monitor#install-and-enable-collection\n"
+        },
+        "preferredSigner": "d524168decc8c4c1fa779dc1a0ad5dd5a3882ccd4500e8cee0504328d481bc57"
+      },
+      "versions": {
+        "a8184b7fd570cbea73a1ceb9ee64530e4a57e8063b85da6423aacde1317f1bed": {
+          "added": 1793312484000,
+          "file": {
+            "name": "/io.github.sivivatu.batterymonitor_2.apk",
+            "sha256": "a8184b7fd570cbea73a1ceb9ee64530e4a57e8063b85da6423aacde1317f1bed",
+            "size": 2904879
+          },
+          "manifest": {
+            "nativecode": [
+              "arm64-v8a",
+              "armeabi-v7a",
+              "x86",
+              "x86_64"
+            ],
+            "versionName": "0.1.0-beta.1",
+            "versionCode": 2,
+            "usesSdk": {
+              "minSdkVersion": 34,
+              "targetSdkVersion": 37
+            },
+            "signer": {
+              "sha256": [
+                "d524168decc8c4c1fa779dc1a0ad5dd5a3882ccd4500e8cee0504328d481bc57"
+              ]
+            },
+            "usesPermission": [
+              {
+                "name": "android.permission.DUMP"
+              },
+              {
+                "name": "android.permission.BATTERY_STATS"
+              },
+              {
+                "name": "android.permission.PACKAGE_USAGE_STATS"
+              },
+              {
+                "name": "android.permission.QUERY_ALL_PACKAGES"
+              },
+              {
+                "name": "android.permission.POST_NOTIFICATIONS"
+              },
+              {
+                "name": "android.permission.WAKE_LOCK"
+              },
+              {
+                "name": "android.permission.ACCESS_NETWORK_STATE"
+              },
+              {
+                "name": "android.permission.RECEIVE_BOOT_COMPLETED"
+              },
+              {
+                "name": "android.permission.FOREGROUND_SERVICE"
+              },
+              {
+                "name": "io.github.sivivatu.batterymonitor.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+              },
+              {
+                "name": "moe.shizuku.manager.permission.API_V23"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
