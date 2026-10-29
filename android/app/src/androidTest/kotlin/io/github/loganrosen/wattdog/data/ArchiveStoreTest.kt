@@ -43,6 +43,29 @@ class ArchiveStoreTest {
         assertEquals(3_600_000L, summary.onBatteryMillis)
     }
 
+    @Test fun oversizedRawBaselineRemainsReadableAfterReopeningAndReplacement() = runBlocking {
+        // Preamble is ignored by the parser, but retained verbatim in the baseline.
+        // Supplementary Unicode characters also exercise SQLite's character offsets.
+        val preamble = buildString {
+            repeat(120_000) { append("Ignored preamble $it \uD83D\uDD0B\u03B1\u03B2\u03B3\n") }
+        }
+        val first = preamble + dump(1, 10.0)
+        assertTrue(first.toByteArray(Charsets.UTF_8).size > 3 * 1024 * 1024)
+        assertEquals(ArchiveCaptureStatus.BASELINE, store.record(first, BatteryStatsParser.parse(first), capturedAtMillis = start))
+        store.close()
+        store = ArchiveStore(context, databaseName)
+        val second = preamble + dump(2, 16.0)
+        assertEquals(ArchiveCaptureStatus.VALID, store.record(second, BatteryStatsParser.parse(second), capturedAtMillis = start + hour))
+        store.close()
+        store = ArchiveStore(context, databaseName)
+        assertEquals(ArchiveCaptureStatus.VALID, record(3, 18.0, start + 2 * hour))
+        assertEquals(ArchiveCaptureStatus.VALID, record(4, 20.0, start + 3 * hour))
+        val summary = store.summary(start, start + 4 * hour)
+        assertEquals(3, summary.intervalCount)
+        assertEquals(10.0, summary.apps.single().totalMah, 0.0001)
+        assertEquals(3 * hour, summary.onBatteryMillis)
+    }
+
     @Test fun osResetPreservesPriorIntervalsWithoutCrossSessionDelta() = runBlocking {
         record(1, 10.0, start)
         record(2, 16.0, start + hour)

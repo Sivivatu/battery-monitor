@@ -183,9 +183,28 @@ class ArchiveStore(context: Context, databaseName: String = "battery-history.db"
     private data class Decision(val status: ArchiveCaptureStatus, val reason: String, val delta: BatteryStatsReport? = null)
 
     private fun previous(db: SQLiteDatabase): Previous? =
-        db.rawQuery("SELECT captured_at, raw, identities FROM baseline WHERE id = 1", null).use { c ->
-            if (!c.moveToFirst()) null else Previous(c.getLong(0), BatteryStatsParser.parse(c.getString(1)), JSONObject(c.getString(2)))
+        db.rawQuery("SELECT captured_at, length(raw), length(identities) FROM baseline WHERE id = 1", null).use { c ->
+            if (!c.moveToFirst()) {
+                null
+            } else {
+                val raw = baselineText(db, "SELECT substr(raw, ?, ?) FROM baseline WHERE id = 1", c.getLong(1))
+                val identities = baselineText(db, "SELECT substr(identities, ?, ?) FROM baseline WHERE id = 1", c.getLong(2))
+                Previous(c.getLong(0), BatteryStatsParser.parse(raw), JSONObject(identities))
+            }
         }
+
+    /** Keep every cursor row bounded, including for existing uncompressed baselines. */
+    private fun baselineText(db: SQLiteDatabase, query: String, characterCount: Long): String = buildString {
+        var offset = 1L
+        while (offset <= characterCount) {
+            db.rawQuery(query, arrayOf(offset.toString(), BASELINE_CHUNK_CHARACTERS.toString())).use { c ->
+                check(c.moveToFirst()) { "Archive baseline disappeared during its transaction" }
+                append(c.getString(0))
+            }
+            // SQLite counts Unicode code points; Kotlin String.length counts UTF-16 units.
+            offset += BASELINE_CHUNK_CHARACTERS
+        }
+    }
 
     private fun decide(previous: Previous?, raw: String, report: BatteryStatsReport, at: Long): Decision {
         if (previous != null && at <= previous.at) {
@@ -414,6 +433,8 @@ class ArchiveStore(context: Context, databaseName: String = "battery-history.db"
     }
 
     private companion object {
+        // At most 256 KiB of UTF-8 text per row, below Android's usual 2 MiB window.
+        const val BASELINE_CHUNK_CHARACTERS = 64 * 1024
         const val MAX_INTERVAL_MILLIS = 3 * 3_600_000L
         const val CLOCK_TOLERANCE_MILLIS = 60_000L
         const val RETENTION_MILLIS = 90 * 24 * 3_600_000L
