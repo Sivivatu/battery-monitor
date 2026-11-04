@@ -211,8 +211,8 @@ def landing(fingerprint: str) -> str:
 <p><img src="{REPO_URL}/index.png" width="192" height="192" alt="QR code for the authenticated beta repository URL"></p>
 <p>Repository SHA-256 fingerprint:</p><p><code>{fingerprint.upper()}</code></p>
 <p>This is the developer-operated public beta feed. No account is required. It is separate from F-Droid’s default catalogue.</p>
-<p>Collection requires ADB permission grants or Shizuku. <a href="https://github.com/Sivivatu/battery-monitor#install-and-enable-collection">Setup, source and limitations</a> · <a href="https://github.com/Sivivatu/battery-monitor/releases">APK releases</a> · <a href="https://github.com/Sivivatu/battery-monitor/issues">Feedback</a></p>
-<p>No telemetry or internet permission is included. Upgrading from a debug preview requires uninstalling it first, which removes saved history.</p></html>'''
+<p>Guided on-device ADB setup needs no computer or separate Shizuku app. Keep Settings and the app visible in split screen while pairing. Computer ADB and Shizuku remain alternatives. <a href="https://github.com/Sivivatu/battery-monitor#install-and-enable-collection">Setup, source and limitations</a> · <a href="https://github.com/Sivivatu/battery-monitor/releases">APK releases</a> · <a href="https://github.com/Sivivatu/battery-monitor/issues">Feedback</a></p>
+<p>No telemetry or uploads are included. Network permission is used only for temporary on-device ADB setup. Signed beta updates preserve local history; differently signed debug previews require uninstalling first, which removes saved history.</p></html>'''
 
 
 def publish(args: argparse.Namespace) -> None:

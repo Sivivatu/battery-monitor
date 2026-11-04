@@ -10,11 +10,17 @@ Summary: Local battery estimates and app usage history
 Description: |
   Battery Monitor shows Android's per-app charge estimates, available
   foreground/background estimates, wakelocks and the system battery timeline.
-  It keeps validated usage history on your device, without ads, accounts,
-  internet permission or telemetry. Android 14 or later is required.
+  It keeps validated usage history on your device, without ads, accounts or
+  telemetry. Android 14 or later is required.
+  Network permission is used only for temporary ADB setup on this device.
 
-  Collection requires ADB permission grants or Shizuku. This early public beta
-  is an independent GPLv3-or-later Wattdog fork; estimates and physical-device
+  Guided on-device ADB setup grants diagnostic permissions without a computer
+  or separate Shizuku installation. Keep Android Settings and the app visible
+  in split screen while pairing. ADB disconnects after setup; Wireless debugging
+  can then be turned off. Computer ADB and Shizuku remain alternatives.
+
+  This early public beta is an independent GPLv3-or-later Wattdog fork;
+  estimates and physical-device
   behavior still need validation. Uninstalling removes saved history.
 
   Setup and limitations: https://github.com/Sivivatu/battery-monitor#install-and-enable-collection
