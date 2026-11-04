@@ -241,17 +241,17 @@ object BatteryStatsParser {
 
                 "Time on battery screen doze" -> report = report.copy(screenDoze = durationBeforeParen(value))
 
-                "Discharge" -> discharge = discharge.copy(totalMah = mahInt(value))
+                "Discharge" -> discharge = discharge.copy(totalMah = mahInt(value, key))
 
-                "Screen off discharge" -> discharge = discharge.copy(screenOffMah = mahInt(value))
+                "Screen off discharge" -> discharge = discharge.copy(screenOffMah = mahInt(value, key))
 
-                "Screen doze discharge" -> discharge = discharge.copy(screenDozeMah = mahInt(value))
+                "Screen doze discharge" -> discharge = discharge.copy(screenDozeMah = mahInt(value, key))
 
-                "Screen on discharge" -> discharge = discharge.copy(screenOnMah = mahInt(value))
+                "Screen on discharge" -> discharge = discharge.copy(screenOnMah = mahInt(value, key))
 
-                "Device light doze discharge" -> discharge = discharge.copy(lightDozeMah = mahInt(value))
+                "Device light doze discharge" -> discharge = discharge.copy(lightDozeMah = mahInt(value, key))
 
-                "Device deep doze discharge" -> discharge = discharge.copy(deepDozeMah = mahInt(value))
+                "Device deep doze discharge" -> discharge = discharge.copy(deepDozeMah = mahInt(value, key))
 
                 "Start clock time" -> report = report.copy(startClockTime = value.trim())
 
@@ -542,6 +542,13 @@ object BatteryStatsParser {
 
         private fun durationAfterFirstColon(content: String): Duration = durationBeforeParen(content.substringAfter("): "))
 
-        private fun mahInt(value: String): Int = value.removeSuffix("mAh").trim().counterInt()
+        private fun mahInt(value: String, field: String): Int {
+            // Android formats microamp-hour discharge counters as decimal mAh; the current model stores whole mAh.
+            val charge = value.removeSuffix("mAh").trim().toDoubleOrNull()
+            if (charge == null || !charge.isFinite() || charge < 0 || charge > Int.MAX_VALUE) {
+                throw BatteryStatsParseException("Invalid or overflowing discharge value in $field")
+            }
+            return charge.roundToInt()
+        }
     }
 }
