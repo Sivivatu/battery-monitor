@@ -7,6 +7,7 @@ the default f-droid.org catalogue. No tester account is needed.
 - Guided on-device ADB setup grants diagnostic permissions without a computer or Shizuku installation.
 - Keep Android's pairing-code dialog and Battery Monitor visible in split screen. Switching away can stop pairing; use a fresh port/code when retrying.
 - Port fields now explain invalid values. Setup failures identify pairing, connection, permission grants, or collection verification.
+- Prevent a fast ADB response from leaving setup waiting after a successful permission grant.
 - After successful setup, turn Wireless debugging off and verify direct collection. No persistent ADB connection is needed.
 - Fix parsing of fractional battery-discharge counters on newer Android versions.
 - No advertisements, telemetry, remote crash reporting, or uploads. Network permission is used only for temporary loopback ADB setup on this device.

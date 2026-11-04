@@ -120,6 +120,10 @@ public class AdbStream implements Closeable {
         mWriteReady.set(true);
     }
 
+    boolean isReadyForWrite() {
+        return mWriteReady.get();
+    }
+
     /**
      * Called by the connection thread to notify that the stream was closed by the peer.
      */

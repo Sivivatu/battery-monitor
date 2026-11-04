@@ -21,7 +21,8 @@ source distribution must preserve these sources, notices, and dependency version
 - `AdbConnection`: socket connection and read timeouts of ten seconds; close waits
   at most one second for its worker; failed socket initialization closes the
   socket; clamp the negotiated packet size to the supported local limit; remove
-  handshake debug output and exception stack printing.
+  handshake debug output and exception stack printing; wait for stream readiness
+  or closure with a monitor-protected predicate so early notifications are not lost.
 - `PairingConnectionCtx`: retain ownership of the raw socket before connect/TLS,
   bound connection and read waits to ten seconds, and close safely even before
   streams or authentication exist; clear the pairing password on close and wipe temporary password/key-material arrays; remove

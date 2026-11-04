@@ -2,3 +2,4 @@ On-device ADB setup without a computer or Shizuku. Keep Settings and the app in 
 Inline port validation and clearer setup errors.
 Direct collection continues after Wireless debugging is turned off.
 Fix parsing of fractional battery-discharge counters.
+Prevent missed ADB notifications during fast permission grants.

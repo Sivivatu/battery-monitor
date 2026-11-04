@@ -17,7 +17,7 @@ android {
         applicationId = "io.github.sivivatu.batterymonitor"
         minSdk = libs.versions.androidSdk.min.get().toInt()
         targetSdk = libs.versions.androidSdk.target.get().toInt()
-        versionCode = 4
+        versionCode = 5
         versionName = "0.1.0-beta.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

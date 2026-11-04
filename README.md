@@ -43,7 +43,7 @@ requires validation; see the [pairing validation report](docs/testing/local-adb-
 The computer ADB fallback was exercised on emulators:
 
 ```sh
-adb install -r io.github.sivivatu.batterymonitor_4.apk
+adb install -r io.github.sivivatu.batterymonitor_5.apk
 adb shell pm grant io.github.sivivatu.batterymonitor android.permission.DUMP
 adb shell pm grant io.github.sivivatu.batterymonitor android.permission.PACKAGE_USAGE_STATS
 adb shell pm grant io.github.sivivatu.batterymonitor android.permission.BATTERY_STATS
