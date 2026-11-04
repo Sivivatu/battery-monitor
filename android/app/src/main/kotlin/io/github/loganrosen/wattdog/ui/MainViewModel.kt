@@ -14,8 +14,12 @@ import io.github.loganrosen.wattdog.data.StatsResetException
 import io.github.loganrosen.wattdog.privileged.AccessMode
 import io.github.loganrosen.wattdog.privileged.AccessState
 import io.github.loganrosen.wattdog.privileged.DumpPermissionDeniedException
+import io.github.loganrosen.wattdog.setup.AdbSetupException
+import io.github.loganrosen.wattdog.setup.AdbSetupState
+import io.github.loganrosen.wattdog.setup.PairingRequest
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -42,6 +46,9 @@ data class HistoryLoad(val loading: Boolean = false, val history: BatteryHistory
 
 class MainViewModel(private val container: AppContainer) : ViewModel() {
     val archive = container.archive
+    private val _adbSetup = MutableStateFlow(AdbSetupState())
+    val adbSetup: StateFlow<AdbSetupState> = _adbSetup.asStateFlow()
+    private var adbJob: Job? = null
     private val load = MutableStateFlow(LoadState())
     private val history = MutableStateFlow(HistoryLoad())
     private var loadJob: Job? = null
@@ -96,6 +103,58 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
     }
 
     fun checkNow() = container.backgroundChecks.checkNow()
+
+    fun enableLocalAdb(pairingPort: String, code: String, connectionPort: String) {
+        if (adbJob?.isActive == true) return
+        val request = try {
+            PairingRequest.parse(pairingPort, code, connectionPort)
+        } catch (failure: IllegalArgumentException) {
+            _adbSetup.value = AdbSetupState(message = failure.message)
+            return
+        }
+        runAdbSetup {
+            container.adbSetup.enable(request) { message -> _adbSetup.value = AdbSetupState(running = true, message = message) }
+            "Permissions granted and direct collection verified. Turn Wireless debugging off, then verify again below."
+        }
+    }
+
+    fun verifyDirectCollection() {
+        if (adbJob?.isActive == true) return
+        runAdbSetup {
+            container.adbSetup.verify()
+            "Direct collection works. If Wireless debugging is off, setup is complete. No ADB connection is running."
+        }
+    }
+
+    fun cancelAdbSetup() {
+        adbJob?.cancel()
+    }
+
+    private fun runAdbSetup(action: suspend () -> String) {
+        _adbSetup.value = AdbSetupState(running = true, message = "Checking direct battery access…")
+        adbJob = viewModelScope.launch {
+            try {
+                val message = action()
+                _adbSetup.value = AdbSetupState(message = message, verified = true)
+            } catch (_: TimeoutCancellationException) {
+                _adbSetup.value =
+                    AdbSetupState(message = "Setup timed out and disconnected. Check both ports and use a fresh pairing code.")
+            } catch (cancelled: CancellationException) {
+                _adbSetup.value = AdbSetupState(message = "Setup cancelled and disconnected. Any permissions already granted are kept.")
+                throw cancelled
+            } catch (failure: AdbSetupException) {
+                _adbSetup.value = AdbSetupState(message = failure.userMessage)
+            } catch (_: Exception) {
+                _adbSetup.value = AdbSetupState(
+                    message = "Setup did not finish. Check Wi-Fi, Wireless debugging, both ports and a fresh pairing code. " +
+                        "Keep the pairing dialog open in split screen. Your device may restrict permission grants. " +
+                        "If permissions were already granted, try Verify direct collection.",
+                )
+            } finally {
+                container.access.refresh()
+            }
+        }
+    }
 
     fun recheckAccess() = container.access.refresh()
 
@@ -183,7 +242,7 @@ class MainViewModel(private val container: AppContainer) : ViewModel() {
 
     private fun describe(e: Exception): String = when (e) {
         is DumpPermissionDeniedException ->
-            "The system refused the dump. If you granted DUMP over adb, also grant PACKAGE_USAGE_STATS.\n${e.message}"
+            "The system refused the dump. If you granted DUMP over adb, also grant PACKAGE_USAGE_STATS and BATTERY_STATS.\n${e.message}"
 
         is BatteryStatsParseException -> "Couldn't read batterystats output: ${e.message}"
 

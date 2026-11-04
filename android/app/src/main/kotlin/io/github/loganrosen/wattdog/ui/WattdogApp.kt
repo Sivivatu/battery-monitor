@@ -97,6 +97,7 @@ private enum class Tab(val label: String, val icon: ImageVector) {
 @Composable
 fun WattdogApp(viewModel: MainViewModel, modifier: Modifier = Modifier) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val adbSetup by viewModel.adbSetup.collectAsStateWithLifecycle()
     val revision by viewModel.archive.revision.collectAsStateWithLifecycle()
     val archiveWriteError by viewModel.archive.error.collectAsStateWithLifecycle()
     var archiveDays by rememberSaveable { mutableIntStateOf(7) }
@@ -169,7 +170,16 @@ fun WattdogApp(viewModel: MainViewModel, modifier: Modifier = Modifier) {
         }
     }
 
-    val current = if (hasAccess || tab == Tab.ARCHIVE) tab else Tab.SETUP
+    LaunchedEffect(adbSetup.running, adbSetup.message) {
+        if (adbSetup.running || adbSetup.message != null) tab = Tab.SETUP
+    }
+    val current = if (adbSetup.running) {
+        Tab.SETUP
+    } else if (hasAccess || tab == Tab.ARCHIVE) {
+        tab
+    } else {
+        Tab.SETUP
+    }
     LaunchedEffect(current, archiveDays, revision) {
         if (current == Tab.ARCHIVE) {
             archiveSummary = null
@@ -264,6 +274,10 @@ fun WattdogApp(viewModel: MainViewModel, modifier: Modifier = Modifier) {
 
                     current == Tab.SETUP -> SetupScreen(
                         access = state.access,
+                        adbSetup = adbSetup,
+                        onEnableAdb = viewModel::enableLocalAdb,
+                        onCancelAdb = viewModel::cancelAdbSetup,
+                        onVerifyAdb = viewModel::verifyDirectCollection,
                         onRequestPermission = viewModel::requestShizukuPermission,
                         launchShizuku = viewModel::shizukuLaunchIntent,
                         backgroundChecks = BackgroundChecksUi(

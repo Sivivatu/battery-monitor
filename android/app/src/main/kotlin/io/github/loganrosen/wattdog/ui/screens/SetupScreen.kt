@@ -38,6 +38,7 @@ import io.github.loganrosen.wattdog.alerts.LastCheck
 import io.github.loganrosen.wattdog.privileged.AccessMode
 import io.github.loganrosen.wattdog.privileged.AccessState
 import io.github.loganrosen.wattdog.privileged.ShizukuStatus
+import io.github.loganrosen.wattdog.setup.AdbSetupState
 import io.github.loganrosen.wattdog.ui.components.SectionCard
 import io.github.loganrosen.wattdog.ui.components.StatRow
 import kotlinx.coroutines.launch
@@ -57,6 +58,10 @@ fun SetupScreen(
     onRequestPermission: () -> Unit,
     launchShizuku: () -> Intent?,
     backgroundChecks: BackgroundChecksUi,
+    adbSetup: AdbSetupState,
+    onEnableAdb: (String, String, String) -> Unit,
+    onCancelAdb: () -> Unit,
+    onVerifyAdb: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -65,8 +70,8 @@ fun SetupScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(
-            "Wattdog reads dumpsys batterystats and dumpsys power, which need shell-level access. " +
-                "Use Shizuku, or grant the permissions once over adb.",
+            "Detailed battery diagnostics need elevated permissions. Grant them on this phone using " +
+                "the guided setup below. Shizuku and computer ADB remain available as alternatives.",
             style = MaterialTheme.typography.bodyMedium,
         )
 
@@ -87,7 +92,9 @@ fun SetupScreen(
         // Stays visible without access so checks that keep failing can still be turned off.
         if (hasAccess || backgroundChecks.enabled) BackgroundChecksCard(backgroundChecks, hasAccess)
 
-        SectionCard("Option 1: Shizuku") {
+        LocalAdbSetupCard(adbSetup, onEnableAdb, onCancelAdb, onVerifyAdb)
+
+        SectionCard("Alternative: Shizuku") {
             Text(shizukuHelp(access.shizuku), style = MaterialTheme.typography.bodyMedium)
             when (val s = access.shizuku) {
                 ShizukuStatus.NotInstalled -> Button(onClick = {
@@ -111,20 +118,23 @@ fun SetupScreen(
             }
         }
 
-        SectionCard("Option 2: adb (no Shizuku)") {
+        SectionCard("Alternative: computer ADB") {
             Text(
-                "From a computer with adb, run these once. They survive reboots but not reinstalling Wattdog.",
+                "From a computer with ADB, run these once. The grants normally survive reboots and app updates; " +
+                    "uninstalling the app removes them.",
                 style = MaterialTheme.typography.bodyMedium,
             )
             CommandBlock(
                 "adb shell pm grant ${BuildConfig.APPLICATION_ID} android.permission.DUMP\n" +
-                    "adb shell pm grant ${BuildConfig.APPLICATION_ID} android.permission.PACKAGE_USAGE_STATS",
+                    "adb shell pm grant ${BuildConfig.APPLICATION_ID} android.permission.PACKAGE_USAGE_STATS\n" +
+                    "adb shell pm grant ${BuildConfig.APPLICATION_ID} android.permission.BATTERY_STATS",
             )
         }
 
         Text(
-            "Dumps never leave the device. Snapshots are stored in app-private storage and contain device and " +
-                "app identifiers, so be careful if you share them.",
+            "No battery data is uploaded. Network access is used only for local ADB setup on this phone. " +
+                "Snapshots are stored in app-private storage and contain device and app identifiers, " +
+                "so be careful if you share them.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

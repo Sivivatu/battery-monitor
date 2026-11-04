@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Only used by the temporary ADB client to connect to 127.0.0.1. No remote endpoints. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- Never granted at install time. Granted with `adb shell pm grant` as an alternative to Shizuku. -->
     <uses-permission
         android:name="android.permission.DUMP"

@@ -17,6 +17,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        exclusiveContent {
+            forRepository { maven("https://jitpack.io") }
+            filter { includeGroup("com.github.MuntashirAkon.spake2-java") }
+        }
     }
 }
 
@@ -24,3 +28,5 @@ rootProject.name = "wattdog"
 
 include(":app")
 include(":core:batterystats")
+
+include(":third_party:libadb")

@@ -22,7 +22,13 @@ Think of it as a modern BetterBatteryStats for Android 14+.
 
 ## Access
 
-`dumpsys batterystats` needs shell-level permissions. Wattdog supports two ways to get them:
+`dumpsys batterystats` needs shell-level permissions. The fork adds on-device wireless ADB setup: enter the connection port and the
+separate pairing port/code using split screen. After the permissions are granted,
+ADB disconnects and direct collection is verified. Turn Wireless debugging off
+and verify again. No computer or Shizuku installation is needed for this route.
+See the root README for build validation and limitations.
+
+The inherited alternatives remain available:
 
 1. **Shizuku** (recommended). Install [Shizuku](https://shizuku.rikka.app/), start it with wireless debugging, and allow Wattdog when asked. Wattdog runs `dumpsys` inside a small Shizuku user service, so no computer is needed after setup.
 2. **One-time adb grant**. From a computer:

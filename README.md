@@ -16,7 +16,8 @@ with durable history and stricter checks on battery-usage comparisons.
   installation metadata are retained where the current profile permits access.
 - Labels missing estimates as unavailable and excludes invalid comparisons,
   counter regressions, missing baselines and collection gaps.
-- Uses no advertisements, server account or internet permission. Backup is disabled.
+- Uses no advertisements, server account or uploads. Network permission is used only
+  for on-device ADB setup. Backup is disabled.
 
 ## Install and enable collection
 
@@ -29,10 +30,20 @@ coexist with upstream Wattdog. It is an early beta, not a stable release.
 Moving from a debug preview to the signed beta requires uninstalling the preview,
 which deletes its local history. Later beta updates preserve the signing identity.
 
-Collection needs elevated access. The ADB route was exercised on emulators:
+Collection needs elevated access. Beta.3 includes on-device
+setup: no PC or Shizuku installation is needed. Connect to Wi-Fi, enable Developer
+options and Wireless debugging, then enter the separate connection port, pairing
+port, and six-digit pairing code in the app. Use split screen so Android's pairing
+dialog stays open. The app grants only its three diagnostic permissions, closes
+ADB, and checks direct collection. Turn Wireless debugging off and use **Verify
+direct collection** again. No background ADB connection is required. Grants normally
+survive reboots and updates; uninstalling removes them. Physical-phone setup still
+requires validation; see the [pairing validation report](docs/testing/local-adb-pairing-2026-10-31.md).
+
+The computer ADB fallback was exercised on emulators:
 
 ```sh
-adb install -r io.github.sivivatu.batterymonitor_2.apk
+adb install -r io.github.sivivatu.batterymonitor_4.apk
 adb shell pm grant io.github.sivivatu.batterymonitor android.permission.DUMP
 adb shell pm grant io.github.sivivatu.batterymonitor android.permission.PACKAGE_USAGE_STATS
 adb shell pm grant io.github.sivivatu.batterymonitor android.permission.BATTERY_STATS
@@ -55,7 +66,8 @@ Requires JDK 21 and Android SDK platform 37. Minimum Android version is 14 (API 
 
 ```sh
 cd android
-./gradlew spotlessCheck :core:batterystats:test :core:batterystats:jacocoTestReport \
+./gradlew spotlessCheck :app:testDebugUnitTest :app:adbSetupCoverage \
+  :core:batterystats:test :core:batterystats:jacocoTestReport \
   :app:lintDebug :app:assembleDebug :app:assembleDebugAndroidTest \
   --no-parallel --max-workers=2
 ```

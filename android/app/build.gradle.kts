@@ -1,7 +1,9 @@
+import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    jacoco
     alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
@@ -15,8 +17,8 @@ android {
         applicationId = "io.github.sivivatu.batterymonitor"
         minSdk = libs.versions.androidSdk.min.get().toInt()
         targetSdk = libs.versions.androidSdk.target.get().toInt()
-        versionCode = 2
-        versionName = "0.1.0-beta.1"
+        versionCode = 4
+        versionName = "0.1.0-beta.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -53,6 +55,9 @@ tasks.withType<KotlinCompile>().configureEach {
 
 dependencies {
     implementation(project(":core:batterystats"))
+    implementation(project(":third_party:libadb"))
+    implementation("org.bouncycastle:bcpkix-jdk15to18:1.81")
+    testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.7.0")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
@@ -74,4 +79,26 @@ dependencies {
 
     implementation(libs.shizuku.api)
     implementation(libs.shizuku.provider)
+}
+
+jacoco { toolVersion = "0.8.14" }
+
+// The Android UI/transport is verified separately on device; this report covers setup orchestration and process bounds.
+tasks.register<JacocoReport>("adbSetupCoverage") {
+    dependsOn("testDebugUnitTest")
+    executionData(
+        fileTree(layout.buildDirectory) {
+            include("outputs/unit_test_code_coverage/debugUnitTest/*.exec", "jacoco/testDebugUnitTest.exec")
+        },
+    )
+    classDirectories.setFrom(
+        fileTree(layout.buildDirectory.dir("intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes")) {
+            include("**/setup/AdbSetupController*.class", "**/setup/PairingRequest*.class", "**/privileged/BoundedProcessKt*.class")
+        },
+    )
+    sourceDirectories.setFrom(files("src/main/kotlin"))
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
 }
