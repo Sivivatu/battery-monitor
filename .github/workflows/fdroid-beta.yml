@@ -159,10 +159,11 @@ jobs:
           fi
           # Push with the checkout's authenticated remote. Never force-push.
           git fetch "$state" fdroid-repo
-          git push origin FETCH_HEAD:refs/heads/fdroid-repo
+          git -c http.version=HTTP/1.1 push origin FETCH_HEAD:refs/heads/fdroid-repo
       - name: Create beta release with corresponding source
         env:
           GH_TOKEN: ${{ github.token }}
+          GODEBUG: http2client=0
           RELEASE_TAG: ${{ inputs.tag }}
           SOURCE_SHA: ${{ needs.build.outputs.source-sha }}
         run: |
