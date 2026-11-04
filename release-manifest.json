@@ -7,5 +7,14 @@
     "apkName": "io.github.sivivatu.batterymonitor_2.apk",
     "sourceSha": "cb487a40d66848a17a354838be59b54b851b9698",
     "addedAt": 1793312484
+  },
+  {
+    "versionCode": 5,
+    "versionName": "0.1.0-beta.3",
+    "tag": "v0.1.0-beta.3",
+    "sha256": "e23fbbb5a710a38106835bdbcb5fa433c674d962696bfe554790d17cb161ef46",
+    "apkName": "io.github.sivivatu.batterymonitor_5.apk",
+    "sourceSha": "6217baae7496c65ced66aced028b055050660336",
+    "addedAt": 1793788243
   }
 ]
