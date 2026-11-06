@@ -12,6 +12,11 @@ Description: |
   foreground/background estimates, wakelocks and the system battery timeline.
   It keeps validated usage history on your device, without ads, accounts or
   telemetry. Android 14 or later is required.
+
+  The History tab shows saved 1-, 7- and 30-day usage and daily app estimates
+  across charging sessions. Tap a dated bar for its value. Enable Automatic
+  history or use Capture now to collect readings; missing days stay unknown.
+  Notification permission is required only for alerts, not local history.
   Network permission is used only for temporary ADB setup on this device.
 
   Guided on-device ADB setup grants diagnostic permissions without a computer

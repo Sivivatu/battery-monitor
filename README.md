@@ -32,7 +32,7 @@ coexist with upstream Wattdog. It is an early beta, not a stable release.
 Moving from a debug preview to the signed beta requires uninstalling the preview,
 which deletes its local history. Later beta updates preserve the signing identity.
 
-Collection needs elevated access. Beta.3 includes on-device
+Collection needs elevated access. The beta includes on-device
 setup: no PC or Shizuku installation is needed. Connect to Wi-Fi, enable Developer
 options and Wireless debugging, then enter the separate connection port, pairing
 port, and six-digit pairing code in the app. Use split screen so Android's pairing
@@ -45,7 +45,7 @@ requires validation; see the [pairing validation report](docs/testing/local-adb-
 The computer ADB fallback was exercised on emulators:
 
 ```sh
-adb install -r io.github.sivivatu.batterymonitor_5.apk
+adb install -r io.github.sivivatu.batterymonitor_6.apk
 adb shell pm grant io.github.sivivatu.batterymonitor android.permission.DUMP
 adb shell pm grant io.github.sivivatu.batterymonitor android.permission.PACKAGE_USAGE_STATS
 adb shell pm grant io.github.sivivatu.batterymonitor android.permission.BATTERY_STATS

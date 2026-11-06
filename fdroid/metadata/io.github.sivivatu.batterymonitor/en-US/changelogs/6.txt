@@ -1,0 +1,5 @@
+History is now in the main navigation, with 1-, 7- and 30-day saved usage.
+Swipe daily charts and tap a date for its app charge estimate.
+Enable Automatic history or Capture now directly from History.
+Local collection works without notification permission; missing readings stay unknown.
+Saved usage survives charging sessions. Detailed battery Timeline remains available.
