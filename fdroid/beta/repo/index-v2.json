@@ -14,7 +14,7 @@
       }
     },
     "address": "https://sivivatu.github.io/battery-monitor/fdroid/beta/repo",
-    "timestamp": 1793789173000,
+    "timestamp": 1793976678000,
     "categories": {
       "System": {
         "name": {
@@ -31,7 +31,7 @@
           "System"
         ],
         "issueTracker": "https://github.com/Sivivatu/battery-monitor/issues",
-        "lastUpdated": 1793788243000,
+        "lastUpdated": 1793976677000,
         "license": "GPL-3.0-or-later",
         "sourceCode": "https://github.com/Sivivatu/battery-monitor",
         "webSite": "https://github.com/Sivivatu/battery-monitor",
@@ -43,11 +43,85 @@
           "en-US": "Local battery estimates and app usage history"
         },
         "description": {
-          "en-US": "Battery Monitor shows Android's per-app charge estimates, available\nforeground/background estimates, wakelocks and the system battery timeline.\nIt keeps validated usage history on your device, without ads, accounts or\ntelemetry. Android 14 or later is required.\nNetwork permission is used only for temporary ADB setup on this device.\n\nGuided on-device ADB setup grants diagnostic permissions without a computer\nor separate Shizuku installation. Keep Android Settings and the app visible\nin split screen while pairing. ADB disconnects after setup; Wireless debugging\ncan then be turned off. Computer ADB and Shizuku remain alternatives.\n\nThis early public beta is an independent GPLv3-or-later Wattdog fork;\nestimates and physical-device\nbehavior still need validation. Uninstalling removes saved history.\n\nSetup and limitations: https://github.com/Sivivatu/battery-monitor#install-and-enable-collection\n"
+          "en-US": "Battery Monitor shows Android's per-app charge estimates, available\nforeground/background estimates, wakelocks and the system battery timeline.\nIt keeps validated usage history on your device, without ads, accounts or\ntelemetry. Android 14 or later is required.\n\nThe History tab shows saved 1-, 7- and 30-day usage and daily app estimates\nacross charging sessions. Tap a dated bar for its value. Enable Automatic\nhistory or use Capture now to collect readings; missing days stay unknown.\nNotification permission is required only for alerts, not local history.\nNetwork permission is used only for temporary ADB setup on this device.\n\nGuided on-device ADB setup grants diagnostic permissions without a computer\nor separate Shizuku installation. Keep Android Settings and the app visible\nin split screen while pairing. ADB disconnects after setup; Wireless debugging\ncan then be turned off. Computer ADB and Shizuku remain alternatives.\n\nThis early public beta is an independent GPLv3-or-later Wattdog fork;\nestimates and physical-device\nbehavior still need validation. Uninstalling removes saved history.\n\nSetup and limitations: https://github.com/Sivivatu/battery-monitor#install-and-enable-collection\n"
         },
         "preferredSigner": "d524168decc8c4c1fa779dc1a0ad5dd5a3882ccd4500e8cee0504328d481bc57"
       },
       "versions": {
+        "c92add54be10cf1386ce7b146ef9566c4587ed17f370cae561e922aacb0a0489": {
+          "added": 1793976677000,
+          "file": {
+            "name": "/io.github.sivivatu.batterymonitor_6.apk",
+            "sha256": "c92add54be10cf1386ce7b146ef9566c4587ed17f370cae561e922aacb0a0489",
+            "size": 15460516
+          },
+          "manifest": {
+            "nativecode": [
+              "arm64-v8a",
+              "armeabi-v7a",
+              "x86",
+              "x86_64"
+            ],
+            "versionName": "0.1.0-beta.4",
+            "versionCode": 6,
+            "usesSdk": {
+              "minSdkVersion": 34,
+              "targetSdkVersion": 37
+            },
+            "signer": {
+              "sha256": [
+                "d524168decc8c4c1fa779dc1a0ad5dd5a3882ccd4500e8cee0504328d481bc57"
+              ]
+            },
+            "usesPermission": [
+              {
+                "name": "android.permission.INTERNET"
+              },
+              {
+                "name": "android.permission.DUMP"
+              },
+              {
+                "name": "android.permission.BATTERY_STATS"
+              },
+              {
+                "name": "android.permission.PACKAGE_USAGE_STATS"
+              },
+              {
+                "name": "android.permission.QUERY_ALL_PACKAGES"
+              },
+              {
+                "name": "android.permission.POST_NOTIFICATIONS"
+              },
+              {
+                "name": "android.permission.WAKE_LOCK"
+              },
+              {
+                "name": "android.permission.ACCESS_NETWORK_STATE"
+              },
+              {
+                "name": "android.permission.RECEIVE_BOOT_COMPLETED"
+              },
+              {
+                "name": "android.permission.FOREGROUND_SERVICE"
+              },
+              {
+                "name": "io.github.sivivatu.batterymonitor.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+              },
+              {
+                "name": "moe.shizuku.manager.permission.API_V23"
+              },
+              {
+                "name": "android.permission.WRITE_EXTERNAL_STORAGE"
+              },
+              {
+                "name": "android.permission.READ_PHONE_STATE"
+              },
+              {
+                "name": "android.permission.READ_EXTERNAL_STORAGE"
+              }
+            ]
+          }
+        },
         "e23fbbb5a710a38106835bdbcb5fa433c674d962696bfe554790d17cb161ef46": {
           "added": 1793788243000,
           "file": {
