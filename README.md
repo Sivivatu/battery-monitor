@@ -12,7 +12,9 @@ with durable history and stricter checks on battery-usage comparisons.
   estimates, wakelocks, radio activity and the system battery timeline.
 - Saves validated usage intervals in an app-private SQLite database, across
   statistics resets, app restarts and charging sessions.
-- Shows saved 1-, 7- and 30-day totals and daily app trends. Package versions and
+- The **History** tab shows saved 1-, 7- and 30-day totals and daily app trends. Swipe
+  the daily chart and tap a bar for its date and app charge estimate; missing days
+  stay marked as missing readings. Package versions and
   installation metadata are retained where the current profile permits access.
 - Labels missing estimates as unavailable and excludes invalid comparisons,
   counter regressions, missing baselines and collection gaps.
@@ -51,9 +53,12 @@ adb shell pm grant io.github.sivivatu.batterymonitor android.permission.BATTERY_
 
 Alternatively, start [Shizuku](https://shizuku.rikka.app/) and authorize the app.
 Shizuku is inherited from upstream; this fork's Shizuku runtime and reboot behavior
-have not been validated. Enable background checks in Settings for periodic
-collection; Android can delay the nominal hourly schedule. The first complete
-capture establishes a baseline; later captures populate Saved history.
+have not been validated. Turn on **Automatic history** in the History tab (or background checks in
+Settings) for periodic collection; Android can delay the nominal hourly schedule. The first complete
+capture establishes a baseline; later captures populate History. **Capture now**
+in that tab saves a reading immediately. Collection works without notification
+permission; that permission is needed only for alerts. **Timeline** opens Android's
+more detailed rotating event history.
 
 The compact archive prunes records older than 90 days when another capture runs.
 Stopping collection can leave older data stored. Raw automatic snapshots have a

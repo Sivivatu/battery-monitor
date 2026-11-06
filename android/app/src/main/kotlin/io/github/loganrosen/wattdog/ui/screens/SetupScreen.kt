@@ -144,20 +144,19 @@ fun SetupScreen(
 @Composable
 private fun BackgroundChecksCard(ui: BackgroundChecksUi, hasAccess: Boolean) {
     val context = LocalContext.current
-    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) ui.onEnabledChange(true)
-    }
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { _ -> }
     fun enable() {
         val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
             PackageManager.PERMISSION_GRANTED
-        if (granted) ui.onEnabledChange(true) else permission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        ui.onEnabledChange(true)
+        if (!granted) permission.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
     SectionCard("Background checks") {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                "Every hour on battery, save an automatic snapshot (kept two days) so the title menu can " +
-                    "show the last few hours or overnight, and notify about new wakelock, background work, " +
-                    "or radio problems.",
+                "Collect saved history about hourly, including while charging. On battery, also save a recent snapshot " +
+                    "(kept two days) for the title menu and check for battery problems. " +
+                    "Saved usage remains available in History across charging sessions.",
                 Modifier.weight(1f).padding(end = 12.dp),
                 style = MaterialTheme.typography.bodyMedium,
             )

@@ -83,14 +83,14 @@ import kotlinx.coroutines.delay
 
 private enum class Tab(val label: String, val icon: ImageVector) {
     DASHBOARD("Dashboard", Icons.Default.Home),
-    HISTORY("History", Icons.Default.DateRange),
+    HISTORY("Timeline", Icons.Default.DateRange),
     WAKELOCKS("Wakelocks", Icons.Default.Lock),
     RADIOS("Radios", Icons.Default.Call),
     APPS("Apps", Icons.AutoMirrored.Filled.List),
 
-    // Reached from the top bar rather than the navigation bar.
+    // Settings and the detailed timeline are reached from the top bar.
     SETUP("Settings", Icons.Default.Settings),
-    ARCHIVE("Saved trends", Icons.Default.DateRange),
+    ARCHIVE("History", Icons.Default.DateRange),
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -210,7 +210,9 @@ fun WattdogApp(viewModel: MainViewModel, modifier: Modifier = Modifier) {
             TopAppBar(
                 title = {
                     when {
-                        current == Tab.ARCHIVE -> Text("Saved trends")
+                        current == Tab.ARCHIVE -> Text("Battery history")
+
+                        current == Tab.HISTORY -> Text("Battery timeline")
 
                         hasAccess && current != Tab.SETUP ->
                             BaselinePicker(
@@ -232,7 +234,11 @@ fun WattdogApp(viewModel: MainViewModel, modifier: Modifier = Modifier) {
                     }
                 },
                 actions = {
-                    IconButton(onClick = { tab = Tab.ARCHIVE }) { Icon(Icons.Default.DateRange, "Saved trends") }
+                    if (current == Tab.ARCHIVE && hasAccess) {
+                        TextButton(onClick = { tab = Tab.HISTORY }) { Text("Timeline") }
+                    } else {
+                        IconButton(onClick = { tab = Tab.ARCHIVE }) { Icon(Icons.Default.DateRange, "Saved trends") }
+                    }
                     if (hasAccess) {
                         IconButton(onClick = viewModel::refresh, enabled = !state.loading) {
                             Icon(Icons.Default.Refresh, "Refresh")
@@ -245,9 +251,9 @@ fun WattdogApp(viewModel: MainViewModel, modifier: Modifier = Modifier) {
         bottomBar = {
             if (hasAccess) {
                 NavigationBar {
-                    Tab.entries.filter { it != Tab.SETUP && it != Tab.ARCHIVE }.forEach { t ->
+                    listOf(Tab.DASHBOARD, Tab.ARCHIVE, Tab.WAKELOCKS, Tab.RADIOS, Tab.APPS).forEach { t ->
                         NavigationBarItem(
-                            selected = current == t,
+                            selected = current == t || (t == Tab.ARCHIVE && current == Tab.HISTORY),
                             onClick = {
                                 tab = t
                                 focus = null
@@ -267,10 +273,22 @@ fun WattdogApp(viewModel: MainViewModel, modifier: Modifier = Modifier) {
                 val analysis = state.analysis
                 val error = state.error
                 when {
-                    current == Tab.ARCHIVE -> ArchiveScreen(archiveSummary, archiveError ?: archiveWriteError, archiveDays, {
-                        archiveDays =
-                            it
-                    })
+                    current == Tab.ARCHIVE -> ArchiveScreen(
+                        summary = archiveSummary,
+                        error = archiveError ?: archiveWriteError ?: state.error,
+                        selectedDays = archiveDays,
+                        onRangeSelect = { archiveDays = it },
+                        backgroundChecks = BackgroundChecksUi(
+                            enabled = backgroundEnabled,
+                            lastCheck = alertState.lastCheck,
+                            onEnabledChange = viewModel::setBackgroundChecks,
+                            onCheckNow = viewModel::checkNow,
+                        ),
+                        hasAccess = hasAccess,
+                        capturing = state.loading,
+                        onCapture = viewModel::refresh,
+                        onOpenSettings = { tab = Tab.SETUP },
+                    )
 
                     current == Tab.SETUP -> SetupScreen(
                         access = state.access,

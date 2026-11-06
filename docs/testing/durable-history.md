@@ -14,6 +14,13 @@ Background collection uses the existing opt-in hourly WorkManager checks, includ
 
 The Saved history screen queries complete intervals wholly inside the selected 1, 7 or 30 day range. It reports the actual captured on-battery time and boundaries. It does not spread a multi-hour interval into synthetic hourly values. Daily app trends group whole intervals by their UTC capture-end date and are explicitly labelled that way; they are not exact calendar-day measurements. Only the most recent 20 boundaries are loaded for display, with the full count retained. Foreground, background, foreground-service and cached estimates remain nullable. If one included interval lacks a state estimate, that state's range total is unknown, including intervals whose total-energy delta is zero. Zero-total coverage rows are persisted. An explicitly reported zero remains zero. Values are Android estimates in mAh, not direct per-app energy measurements.
 
+
+The bottom **History** tab opens saved usage. Its daily chart can be swiped and
+individual dates tapped for an exact app estimate. **Automatic history** controls
+the existing hourly checks; **Capture now** saves a fresh reading. Collection does
+not require notification permission. **Timeline** opens Android's separate,
+rotating event history. See [history UI validation](history-usage-2026-11-05.md).
+
 ## Test guarantees
 
 `ArchiveStoreTest` exercises actual SQLite and app-private files on Android:

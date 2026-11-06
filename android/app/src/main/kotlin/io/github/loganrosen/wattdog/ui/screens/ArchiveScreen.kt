@@ -7,10 +7,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.loganrosen.wattdog.batterystats.analysis.formatMah
@@ -31,6 +35,11 @@ fun ArchiveScreen(
     error: String?,
     selectedDays: Int,
     onRangeSelect: (Int) -> Unit,
+    backgroundChecks: BackgroundChecksUi,
+    hasAccess: Boolean,
+    capturing: Boolean,
+    onCapture: () -> Unit,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -46,7 +55,7 @@ fun ArchiveScreen(
                     }
                 }
                 EmptyNote(
-                    "Stored on this device across charging and restarts. Enable background checks in Settings to collect about hourly; Android may delay checks.",
+                    "Saved on this device across charging and restarts.",
                 )
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 summary?.let { saved ->
@@ -59,11 +68,17 @@ fun ArchiveScreen(
                 } ?: if (error == null) Text("Loading saved history…") else Unit
             }
         }
-        if (summary?.apps.isNullOrEmpty()) {
+        summary?.let { saved ->
+            item { ArchiveTrendChart(saved) }
+        }
+        item {
+            HistoryCollectionCard(backgroundChecks, hasAccess, capturing, onCapture, onOpenSettings)
+        }
+        if (summary != null && summary.apps.isEmpty()) {
             item {
                 SectionCard("App trends") {
                     EmptyNote(
-                        "No comparable app readings yet. Two captures in the same battery-accounting session are needed. Gaps and resets are recorded rather than filled with zeros.",
+                        "No comparable app readings in this range yet. Capture now to start, then capture again after some battery use, or enable automatic history. History cannot be recovered from before collection started. Gaps and resets are recorded rather than filled with zeros.",
                     )
                 }
             }
@@ -112,7 +127,7 @@ private fun ArchivedAppCard(app: ArchivedApp) {
                 style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier.padding(top = 8.dp),
             )
-            app.dailyUsage.take(7).forEach { day ->
+            app.dailyUsage.forEach { day ->
                 val date = java.time.Instant.ofEpochMilli(day.dayStartMillis).atZone(java.time.ZoneOffset.UTC).toLocalDate()
                 StatRow(date.toString(), formatMah(day.totalMah))
                 EmptyNote(
@@ -121,6 +136,47 @@ private fun ArchivedAppCard(app: ArchivedApp) {
                     ) ?: "unknown"} · background ${day.backgroundMah?.let(::formatMah) ?: "unknown"}",
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun HistoryCollectionCard(
+    checks: BackgroundChecksUi,
+    hasAccess: Boolean,
+    capturing: Boolean,
+    onCapture: () -> Unit,
+    onOpenSettings: () -> Unit,
+) {
+    SectionCard("History collection") {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Automatic history", Modifier.weight(1f))
+            Switch(
+                checked = checks.enabled,
+                onCheckedChange = checks.onEnabledChange,
+                enabled = hasAccess || checks.enabled,
+            )
+        }
+        EmptyNote(
+            if (checks.enabled) {
+                "Collects about hourly, including while charging. Android may delay checks. Background checks can also alert about battery problems when notifications are allowed."
+            } else {
+                "Turn on to build history while the app is closed. Existing saved history is kept when you turn this off."
+            },
+        )
+        checks.lastCheck?.let { check ->
+            EmptyNote(
+                "Last background check: ${DateFormat.getDateTimeInstance(
+                    DateFormat.SHORT,
+                    DateFormat.SHORT,
+                ).format(Date(check.atMillis))} · ${check.summary}",
+            )
+        }
+        if (hasAccess) {
+            Button(onClick = onCapture, enabled = !capturing) { Text(if (capturing) "Capturing…" else "Capture now") }
+        } else {
+            EmptyNote("Battery access is needed for new readings. Saved history is still available.")
+            OutlinedButton(onClick = onOpenSettings) { Text("Set up battery access") }
         }
     }
 }

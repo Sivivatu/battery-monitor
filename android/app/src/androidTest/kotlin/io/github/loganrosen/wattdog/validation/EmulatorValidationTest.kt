@@ -2,6 +2,7 @@ package io.github.loganrosen.wattdog.validation
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -26,6 +27,10 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class EmulatorValidationTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
+
+    private companion object {
+        const val TAG = "EmulatorValidationTest"
+    }
 
     @Test fun directCollectionRunsWithAppPermissionRatherThanShellIdentity() = runBlocking {
         val source = DirectDumpSource(context)
@@ -68,18 +73,47 @@ class EmulatorValidationTest {
         context.startActivity(
             context.packageManager.getLaunchIntentForPackage(context.packageName)!!.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
         )
-        assertTrue(device.wait(Until.hasObject(By.desc("Refresh")), 30_000))
-        device.findObject(By.desc("Saved trends")).click()
+        dismissSystemUiAnrIfPresent(device)
+        val refreshVisible = device.wait(Until.hasObject(By.desc("Refresh")), 30_000)
+        if (!refreshVisible) {
+            val hierarchy = context.cacheDir.resolve("history-screen-ui.xml")
+            device.dumpWindowHierarchy(hierarchy)
+            val systemUiAnrVisible = device.hasObject(By.text("System UI isn't responding"))
+            Log.e(TAG, "History screen startup timed out; systemUiAnrVisible=$systemUiAnrVisible; hierarchy=$hierarchy")
+            assertTrue("Refresh not visible after 30 seconds; System UI ANR dialog=$systemUiAnrVisible", refreshVisible)
+        }
+        assertFalse("System UI ANR overlay remained while Refresh was visible", device.hasObject(By.text("System UI isn't responding")))
+        device.findObject(By.text("History")).click()
         assertTrue(device.wait(Until.hasObject(By.text("Saved battery history")), 10_000))
         assertTrue(device.hasObject(By.text("7d")))
+        assertTrue(device.hasObject(By.text("Timeline")))
         device.findObject(By.text("30d")).click()
         assertTrue("The selected range must finish loading", device.wait(Until.hasObject(By.text("Recorded intervals")), 10_000))
+        device.findObject(By.text("Timeline")).click()
+        assertTrue(device.wait(Until.hasObject(By.text("Battery timeline")), 10_000))
+        device.findObject(By.desc("Saved trends")).click()
+        assertTrue(device.wait(Until.hasObject(By.text("Saved battery history")), 10_000))
         device.pressBack()
         assertTrue(device.wait(Until.hasObject(By.text("Dashboard")), 10_000))
         device.findObject(By.text("Apps")).click()
         assertTrue(device.wait(Until.hasObject(By.text("Apps")), 10_000))
         device.findObject(By.text("History")).click()
         assertTrue(device.wait(Until.hasObject(By.text("History")), 10_000))
+    }
+
+    private fun dismissSystemUiAnrIfPresent(device: UiDevice) {
+        val dialog = By.text("System UI isn't responding")
+        if (!device.hasObject(dialog)) return
+        val waitButton = device.findObject(By.res("android:id/aerr_wait"))
+        assertNotNull("System UI ANR dialog did not expose its Wait action", waitButton)
+        waitButton!!.click()
+        val dismissed = device.wait(Until.gone(dialog), 3_000)
+        if (!dismissed) {
+            val hierarchy = context.cacheDir.resolve("system-ui-anr-after-wait.xml")
+            device.dumpWindowHierarchy(hierarchy)
+            Log.e(TAG, "System UI ANR dialog remained after Wait; hierarchy=$hierarchy")
+        }
+        assertTrue("Known System UI ANR overlay remained after choosing Wait", dismissed)
     }
 
     @Test fun automaticCheckPersistsARealSnapshotAndDisablePreservesArchive() = runBlocking {
